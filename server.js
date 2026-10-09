@@ -46,6 +46,47 @@ app.post("/cadastro", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    const email = req.body.email;
+    const senha = req.body.senha;
+ 
+    
+    if (!email || !senha) {
+      return res.status(400).json({ erro: "Preencha email e senha" });
+    }
+ 
+    
+    const usuario = await prisma.user.findUnique({
+      where: { email: email },
+    });
+ 
+    
+    if (!usuario) {
+      return res.status(401).json({ erro: "Email ou senha incorretos" });
+    }
+ 
+    
+    if (usuario.senha !== senha) {
+      return res.status(401).json({ erro: "Email ou senha incorretos" });
+    }
+ 
+    
+    res.status(200).json({
+      mensagem: "Login realizado com sucesso!",
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        tipoUsuario: usuario.tipoUsuario,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ erro: "Erro interno no servidor." });
+  }
+});
+
 app.listen(3333, () => {
   console.log("Server is running on port 3333");
 });
