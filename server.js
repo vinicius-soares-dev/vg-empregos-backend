@@ -48,30 +48,22 @@ app.post("/cadastro", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    const email = req.body.email;
-    const senha = req.body.senha;
- 
-    
+    const { email, senha } = req.body;
+
     if (!email || !senha) {
       return res.status(400).json({ erro: "Preencha email e senha" });
     }
- 
-    
+
     const usuario = await prisma.user.findUnique({
-      where: { email: email },
+      where: { email },
     });
- 
-    
-    if (!usuario) {
-      return res.status(401).json({ erro: "Email ou senha incorretos" });
+
+    if (!usuario || usuario.senha !== senha) {
+      return res.status(401).json({
+        erro: "Email ou senha incorretos.",
+      });
     }
- 
-    
-    if (usuario.senha !== senha) {
-      return res.status(401).json({ erro: "Email ou senha incorretos" });
-    }
- 
-    
+
     res.status(200).json({
       mensagem: "Login realizado com sucesso!",
       usuario: {
