@@ -186,12 +186,6 @@ app.delete("/vagas/:id", async (req, res)=>{
   try{
     const vagaId = parseInt(req.params.id);
 
-    if(!vagaId){
-      return res.status(400).json({
-        erro: "É necessário ter um id válido, ID inválido",
-      });
-    }
-
     const vagaExcluida = await prisma.job.delete({
       where: { id: vagaId}
     });
