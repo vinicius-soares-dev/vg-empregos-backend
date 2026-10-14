@@ -182,6 +182,34 @@ app.patch("/vagas/:id/status", async (req, res) => {
   }
 });
 
+app.delete("/vagas/:id", async (req, res)=>{
+  try{
+    const vagaId = parseInt(req.params.id);
+
+    if(!vagaId){
+      return res.status(400).json({
+        erro: "É necessário ter um id válido, ID inválido",
+      });
+    }
+
+    const vagaExcluida = await prisma.job.delete({
+      where: { id: vagaId}
+    });
+    res.status(200).json({
+      mensagem: "Vaga Excluida com sucesso!",
+      vaga: vagaExcluida,
+    });
+  } catch (error) {
+    console.error(error);
+    if(error.code === "P2025"){
+      return res.status(404).json({ erro: "Vaga não encontrada." });
+    }
+    res.status(500).json({
+      erro: "Erro ao excluir a vaga.",
+    });
+  }
+});
+
 app.listen(3333, () => {
   console.log("Server is running on port 3333");
 });
