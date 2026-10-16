@@ -185,6 +185,70 @@ app.patch("/vagas/:id/status", async (req, res) => {
   }
 });
 
+app.delete("/vagas/:id", async (req, res) => {
+  try {
+    const vagaId = parseInt(req.params.id);
+
+    await prisma.job.delete({
+      where: { id: vagaId },
+    });
+    res.status(200).json({ mensagem: "Vaga excluída com sucesso." });
+  } catch (error) {
+    console.error(error);
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        erro: "Vaga não encontrada para exclusão.",
+      });
+    }
+    res.status(500).json({
+      erro: "Erro ao excluir a vaga.",
+    });
+  }
+});
+// useEffect
+app.get("/vagas", async (req, res) => {
+  try {
+    const vagas = await prisma.job.findMany({
+      where: {
+        status: "ativa",
+      },
+      orderBy: {
+        criadoEm: "desc",
+      },
+      include: {
+        empresa: {
+          select: {
+            nome: true,
+            email: true,
+          },
+        },
+      },
+    });
+    res.status(200).json(vagas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: "Erro ao buscar as vagas." });
+  }
+});
+
+app.get("/vagas/empresa/:empresaId", async (req, res) => {
+  try {
+    const idDaEmpresa = parseInt(req.params.empresaId);
+    const vagasDaEmpresa = await prisma.job.findMany({
+      where: {
+        empresaId: idDaEmpresa,
+      },
+      orderBy: {
+        criadoEm: "desc",
+      },
+    });
+    res.status(200).json(vagasDaEmpresa);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: "Erro ao buscar as vagas da empresa" });
+  }
+});
+
 app.listen(3333, () => {
   console.log("Server is running on port 3333");
 });
